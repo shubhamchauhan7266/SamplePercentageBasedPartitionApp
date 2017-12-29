@@ -3,9 +3,13 @@ package com.kelltontech.samplepercentagebasedpartitionapp;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
@@ -13,72 +17,122 @@ import android.widget.SeekBar;
 
 public class CustomProgressBar extends android.support.v7.widget.AppCompatSeekBar {
 
-	private ArrayList<ProgressItem> mProgressItemsList;
+    private ArrayList<ProgressItem> mProgressItemsList;
+    private static final int LEFT=1;
+    private static final int RIGHT=2;
 
-	public CustomProgressBar(Context context) {
-		super(context);
-		mProgressItemsList = new ArrayList<>();
-	}
-
-	public CustomProgressBar(Context context, AttributeSet attrs) {
-		super(context, attrs);
+    public CustomProgressBar(Context context) {
+        super(context);
         mProgressItemsList = new ArrayList<>();
     }
 
-	public CustomProgressBar(Context context, AttributeSet attrs, int defStyle) {
-		super(context, attrs, defStyle);
+    public CustomProgressBar(Context context, AttributeSet attrs) {
+        super(context, attrs);
         mProgressItemsList = new ArrayList<>();
     }
 
-	public void initData(ArrayList<ProgressItem> progressItemsList) {
-		this.mProgressItemsList = progressItemsList;
-	}
+    public CustomProgressBar(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+        mProgressItemsList = new ArrayList<>();
+    }
 
-	@Override
-	protected synchronized void onMeasure(int widthMeasureSpec,
-			int heightMeasureSpec) {
-		// TODO Auto-generated method stub
-		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-	}
+    public void initData(ArrayList<ProgressItem> progressItemsList) {
+        this.mProgressItemsList = progressItemsList;
+    }
 
-	protected void onDraw(Canvas canvas) {
-		if (mProgressItemsList.size() > 0) {
-			int progressBarWidth = getWidth();
-			int progressBarHeight = getHeight();
-			int thumboffset = getThumbOffset();
-			int lastProgressX = 0;
-			int progressItemWidth, progressItemRight;
-			for (int i = 0; i < mProgressItemsList.size(); i++) {
-				ProgressItem progressItem = mProgressItemsList.get(i);
-				Paint progressPaint = new Paint();
-				progressPaint.setColor(getResources().getColor(
-						progressItem.color));
+    @Override
+    protected synchronized void onMeasure(int widthMeasureSpec,
+                                          int heightMeasureSpec) {
+        // TODO Auto-generated method stub
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
 
-				progressItemWidth = (int) (progressItem.progressItemPercentage
-						* progressBarWidth / 100);
+    protected void onDraw(Canvas canvas) {
+        if (mProgressItemsList.size() > 0) {
+            int progressBarWidth = getWidth();
+            int progressBarHeight = getHeight();
+            int thumboffset = getThumbOffset();
+            int lastProgressX = 0;
+            int progressItemWidth, progressItemRight;
+            for (int i = 0; i < mProgressItemsList.size(); i++) {
+                ProgressItem progressItem = mProgressItemsList.get(i);
+                Paint progressPaint = new Paint();
+                progressPaint.setColor(getResources().getColor(
+                        progressItem.color));
 
-				progressItemRight = lastProgressX + progressItemWidth;
+                progressItemWidth = (int) (progressItem.progressItemPercentage
+                        * progressBarWidth / 100);
 
-				// for last item give right to progress item to the width
-				if (i == mProgressItemsList.size() - 1
-						&& progressItemRight != progressBarWidth) {
-					progressItemRight = progressBarWidth;
-				}
-				RectF progressRect = new RectF();
-				progressRect.set(lastProgressX, thumboffset / 2,
-						progressItemRight, progressBarHeight - thumboffset / 2);
+                progressItemRight = lastProgressX + progressItemWidth;
 
-                    canvas.drawRect(progressRect,progressPaint);
+                // for last item give right to progress item to the width
+                if (i == mProgressItemsList.size() - 1
+                        && progressItemRight != progressBarWidth) {
+                    progressItemRight = progressBarWidth;
+                }
+                RectF progressRect = new RectF();
+                progressRect.set(lastProgressX, thumboffset / 2,
+                        progressItemRight, progressBarHeight - thumboffset / 2);
+
+                if (i == 0) {
+                    Path path = RoundedRect(lastProgressX, thumboffset / 2, progressItemRight, progressBarHeight - thumboffset / 2, 30, 30, LEFT);
+                    canvas.drawPath(path, progressPaint);
+                } else if(i==mProgressItemsList.size()-1){
+                    Path path = RoundedRect(lastProgressX, thumboffset / 2, progressItemRight, progressBarHeight - thumboffset / 2, 30, 30, RIGHT);
+                    canvas.drawPath(path, progressPaint);
+                }else{
+                    canvas.drawRect(progressRect, progressPaint);
+                }
+
                 lastProgressX = progressItemRight;
-			}
-			RectF rectF=new RectF();
-			rectF.set(0,thumboffset/2,getWidth(),getHeight()-thumboffset/2);
-			Paint paint=new Paint();
-			paint.setColor(Color.BLACK);
-			canvas.drawRoundRect(rectF,20,20,paint);
-            super.onDraw(canvas);
-		}
+            }
+//			Resources res = getResources();
+//			Paint progressPaint = new Paint();
+//			Bitmap bitmap = BitmapFactory.decodeResource(res, R.drawable.back);
+//			canvas.drawBitmap(bitmap, 0, 0, progressPaint);
 
-	}
+            super.onDraw(canvas);
+        }
+
+    }
+
+    static public Path RoundedRect(float left, float top, float right, float bottom, float rx, float ry, int leftOrRight) {
+        Path path = new Path();
+        if (rx < 0) rx = 0;
+        if (ry < 0) ry = 0;
+        float width = right - left;
+        float height = bottom - top;
+        if (rx > width / 2) rx = width / 2;
+        if (ry > height / 2) ry = height / 2;
+        float widthMinusCorners = (width - (2 * rx));
+        float heightMinusCorners = (height - (2 * ry));
+
+        if(leftOrRight==LEFT){
+            // left side
+            path.moveTo(right, top + ry);
+            path.rLineTo(0, -ry);//top-right corner
+            path.rLineTo(-widthMinusCorners, 0);
+            path.rQuadTo(-rx, 0, -rx, ry); //top-left corner
+            path.rLineTo(0, heightMinusCorners);
+            path.rQuadTo(0, ry, rx, ry);//bottom-left corner
+            path.rLineTo(widthMinusCorners, 0);
+            path.rLineTo(0,-ry); //bottom-right corner
+            path.rLineTo(0, -heightMinusCorners);
+        }else {
+            // right side
+            path.moveTo(right, top + ry);
+            path.rQuadTo(0, -ry, -rx, -ry);//top-right corner
+            path.rLineTo(-width, 0);
+            path.rLineTo(0, ry); //top-left corner
+            path.rLineTo(0, heightMinusCorners);
+            path.rLineTo(0, ry);//bottom-left corner
+            path.rLineTo(width, 0);
+            path.rQuadTo(rx, 0, rx, -ry); //bottom-right corner
+            path.rLineTo(0, -heightMinusCorners);
+        }
+        path.close();//Given close, last lineto can be removed.
+
+        return path;
+    }
 
 }

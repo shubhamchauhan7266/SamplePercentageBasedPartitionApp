@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initDataToSeekbar() {
-        ArrayList<ProgressItem> progressItemList = new ArrayList<ProgressItem>();
+        ArrayList<ProgressItem> progressItemList = new ArrayList<>();
 
         progressItemList.add(addProgressItem(20,R.color.red));
         progressItemList.add(addProgressItem(30,R.color.blue));
