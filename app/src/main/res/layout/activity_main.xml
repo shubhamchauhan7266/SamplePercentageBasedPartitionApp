@@ -12,6 +12,5 @@
         android:layout_margin="10dp"
         android:max="100"
         android:progress="0"
-        android:progressDrawable="@android:color/transparent"
-        android:background="@drawable/custom_rounded_background"/>
+        android:progressDrawable="@android:color/transparent" />
 </FrameLayout>
