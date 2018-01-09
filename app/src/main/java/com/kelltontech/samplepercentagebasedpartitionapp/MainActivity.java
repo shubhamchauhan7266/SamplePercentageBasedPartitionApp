@@ -24,10 +24,10 @@ public class MainActivity extends AppCompatActivity {
     private void initDataToSeekbar() {
         ArrayList<ProgressItem> progressItemList = new ArrayList<>();
 
-        progressItemList.add(addProgressItem(20,R.color.red));
-        progressItemList.add(addProgressItem(30,R.color.blue));
-        progressItemList.add(addProgressItem(20,R.color.green));
-        progressItemList.add(addProgressItem(30,R.color.yellow));
+        progressItemList.add(addProgressItem(80,R.color.red));
+        progressItemList.add(addProgressItem(10,R.color.blue));
+        progressItemList.add(addProgressItem(10,R.color.green));
+        progressItemList.add(addProgressItem(0,R.color.yellow));
         seekbar.initData(progressItemList);
         seekbar.invalidate();
     }

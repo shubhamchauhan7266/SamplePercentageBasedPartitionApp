@@ -20,6 +20,10 @@ public class CustomProgressBar extends android.support.v7.widget.AppCompatSeekBa
     private ArrayList<ProgressItem> mProgressItemsList;
     private static final int LEFT=1;
     private static final int RIGHT=2;
+    private static final int CURVE_NOT_USED=0;
+    private static final int CURVE_REQUIRED=1;
+    private static final int CURVE_NOT_REQUIRED=2;
+
 
     public CustomProgressBar(Context context) {
         super(context);
@@ -54,6 +58,9 @@ public class CustomProgressBar extends android.support.v7.widget.AppCompatSeekBa
             int thumboffset = getThumbOffset();
             int lastProgressX = 0;
             int progressItemWidth, progressItemRight;
+            int leftCurveRequired=0;
+            int rightCurvedRequired=0;
+            int totalPercentage=0;
             for (int i = 0; i < mProgressItemsList.size(); i++) {
                 ProgressItem progressItem = mProgressItemsList.get(i);
                 Paint progressPaint = new Paint();
@@ -65,6 +72,15 @@ public class CustomProgressBar extends android.support.v7.widget.AppCompatSeekBa
 
                 progressItemRight = lastProgressX + progressItemWidth;
 
+                totalPercentage=totalPercentage+((int)progressItem.progressItemPercentage);
+
+                if(leftCurveRequired==CURVE_NOT_USED&&((int)progressItem.progressItemPercentage)>0)
+                    leftCurveRequired=CURVE_REQUIRED;
+
+                if(rightCurvedRequired==CURVE_NOT_USED&&((int)progressItem.progressItemPercentage)>0&&totalPercentage==100){
+                    rightCurvedRequired=CURVE_REQUIRED;
+                }
+
                 // for last item give right to progress item to the width
                 if (i == mProgressItemsList.size() - 1
                         && progressItemRight != progressBarWidth) {
@@ -74,12 +90,21 @@ public class CustomProgressBar extends android.support.v7.widget.AppCompatSeekBa
                 progressRect.set(lastProgressX, thumboffset / 2,
                         progressItemRight, progressBarHeight - thumboffset / 2);
 
-                if (i == 0) {
+                if(((int)(progressItem.progressItemPercentage))==100){
+                    canvas.drawRoundRect(progressRect,30,30, progressPaint);
+                    super.onDraw(canvas);
+                    return;
+                }
+
+                if (leftCurveRequired==CURVE_REQUIRED) {
+                    leftCurveRequired=CURVE_NOT_REQUIRED;
                     Path path = RoundedRect(lastProgressX, thumboffset / 2, progressItemRight, progressBarHeight - thumboffset / 2, 30, 30, LEFT);
                     canvas.drawPath(path, progressPaint);
-                } else if(i==mProgressItemsList.size()-1){
+                } else if(rightCurvedRequired==CURVE_REQUIRED){
                     Path path = RoundedRect(lastProgressX, thumboffset / 2, progressItemRight, progressBarHeight - thumboffset / 2, 30, 30, RIGHT);
                     canvas.drawPath(path, progressPaint);
+                    super.onDraw(canvas);
+                    return;
                 }else{
                     canvas.drawRect(progressRect, progressPaint);
                 }
